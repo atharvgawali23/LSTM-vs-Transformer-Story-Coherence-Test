@@ -1,72 +1,77 @@
-# LSTM vs Transformer Story Coherence Test
+<div align="center">
 
-A small Gradio app that compares story continuations from a character-level LSTM and distilGPT-2. The project uses TinyStories-style children's story prompts to make character and plot continuity easy to inspect.
+# 🧸 LSTM vs Transformer
+### Story Coherence Lab
 
-## What it compares
+**Can a Transformer keep a simple story on track better than an LSTM?**
 
-- **char-LSTM:** a two-layer character language model built with TensorFlow/Keras.
-- **distilGPT-2:** a Hugging Face causal language model (PyTorch). If a fine-tuned checkpoint is present, the app uses it; otherwise it loads the base `distilgpt2` model.
-- **Coherence:** BERT Next Sentence Prediction scores sentence pairs at different distances.
-- **Other measures:** character-normalized perplexity, generation time, and a scan for copied 8-grams from the local corpus.
-- **Audio:** reads the higher-scoring continuation with Google Text-to-Speech.
+Compare character-by-character and token-based generation on children's story prompts, then inspect their coherence, perplexity, and copying metrics.
 
-Both generators use the same prompt and sampling controls (temperature, top-k, top-p, output length, and seed). The app displays their continuations, metrics, and a coherence-by-distance plot.
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/LSTM-TensorFlow%20%2F%20Keras-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![PyTorch](https://img.shields.io/badge/Transformer-PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+![Gradio](https://img.shields.io/badge/UI-Gradio-F97316?style=for-the-badge&logo=gradio&logoColor=white)
 
-## Application flow
+</div>
+
+---
+
+## ✨ Explore the comparison
+
+Enter a story opening and generate two continuations with the same sampling settings. The app scores both outputs and presents the results side by side.
+
+| 🧠 Character LSTM | ⚡ distilGPT-2 |
+|:--|--:|
+| Two-layer model built with TensorFlow/Keras | Transformer model served with Hugging Face and PyTorch |
+| Predicts one character at a time | Generates token sequences |
+
+### 📊 What gets measured
+
+- **Story coherence** — BERT Next Sentence Prediction scores across sentence distances
+- **Language-model fit** — character-normalized perplexity
+- **Memorization** — copied 8-gram percentage and longest copied span
+- **Speed** — generation latency
+- **Listening** — text-to-speech for the higher-scoring continuation
+
+Sampling is shared between models: temperature, top-k, top-p, output length, and seed.
+
+## 🗺️ How it works
 
 ```mermaid
 flowchart LR
-    U[User prompt and sampling settings] --> A[Gradio app]
+    U([✍️ Prompt + settings]) --> A[Gradio app]
     A --> L[Character LSTM]
     A --> G[distilGPT-2]
-    L --> SL[LSTM continuation]
-    G --> SG[Transformer continuation]
-    SL --> E[Evaluation]
+    L --> SL[LSTM story]
+    G --> SG[Transformer story]
+    SL --> E[Evaluate both]
     SG --> E
-    E --> NSP[BERT next-sentence coherence]
-    E --> P[Character perplexity]
-    E --> M[Copied 8-gram scan]
-    E --> T[Generation latency]
-    NSP --> R[Comparison table and coherence plot]
+    E --> N[BERT coherence]
+    E --> P[Perplexity]
+    E --> M[Copy scan]
+    E --> T[Generation time]
+    N --> R[Metrics + plot]
     P --> R
     M --> R
     T --> R
-    SL --> W[Higher-scoring continuation]
+    SL --> W[Choose higher coherence score]
     SG --> W
-    W --> V[Text-to-speech audio]
-    R --> O[Results shown in Gradio]
+    W --> V[Text-to-speech]
+    R --> O([📈 Gradio results])
     V --> O
 ```
 
-## Repository contents
+## 🚀 Run it locally
 
-```text
-app.py                  Gradio application
-core/                   Model loading, generation, scoring, and guardrails
-data/tinystories.txt    Local story corpus
-report/                 Project report and report builder
-Dockerfile              Container image definition
-requirements.txt        Python dependencies
-```
+### 1. Install dependencies
 
-The project report is available at [`report/16_Atharv_P16.pdf`](report/16_Atharv_P16.pdf).
-
-## Requirements
-
-- Python 3.12 (the Docker image uses Python 3.12)
-- Dependencies listed in `requirements.txt`
-- Model artifacts for the character LSTM under `models/char_lstm/` (`vocab.json` and `char_lstm.weights.h5`)
-- A trained LSTM checkpoint is required at startup. The app also loads `bert-base-uncased` for coherence scoring. The GPT-2 and BERT checkpoints are downloaded from Hugging Face unless already cached or baked into the Docker image.
-
-The repository does not include the trained LSTM model artifacts or a training script, so obtain or create those artifacts before launching the app.
-
-## Run locally
+Python 3.12 is used by the included Docker image.
 
 ```bash
 python -m venv .venv
 ```
 
-Activate the virtual environment, then install the dependencies:
+Activate the environment and install packages:
 
 ```bash
 # Windows PowerShell
@@ -76,29 +81,59 @@ Activate the virtual environment, then install the dependencies:
 source .venv/bin/activate
 
 pip install -r requirements.txt
+```
+
+### 2. Add the LSTM checkpoint
+
+Place these trained model files in `models/char_lstm/`:
+
+```text
+models/char_lstm/
+├── vocab.json
+└── char_lstm.weights.h5
+```
+
+> **Model files required:** The trained LSTM checkpoint and training script are not included in this repository. The app needs the checkpoint to start. BERT and distilGPT-2 model files are downloaded from Hugging Face if they are not already cached.
+
+### 3. Launch the app
+
+```bash
 python app.py
 ```
 
-Open <http://localhost:7860>. The app accepts the `PORT` environment variable when running in a hosted environment.
+Open **http://localhost:7860**. Set the `PORT` environment variable when running in a hosted environment.
 
-## Docker
+## 🐳 Run with Docker
 
-Build and run the container from the repository root:
+The Docker image pre-downloads the base distilGPT-2 and BERT checkpoints. Add the LSTM files above before building.
 
 ```bash
 docker build -t story-coherence .
 docker run --rm -p 8080:8080 story-coherence
 ```
 
-The Docker build pre-downloads the base distilGPT-2 and BERT checkpoints. Provide the LSTM artifacts in `models/char_lstm/` before building the image.
+Open **http://localhost:8080**.
 
-## Notes
+## 🧰 Project map
 
-- Default sampling settings are temperature `0.7`, top-k `40`, top-p `0.90`, 450 generated characters, and seed `42`.
-- Generated model and evaluation outputs are not included in this repository.
-- The report and app describe additional project experiments; the interactive app focuses on side-by-side story generation and its displayed metrics.
+```text
+app.py                  Gradio interface and comparison flow
+core/                   Models, scoring, guardrails, and speech
+data/                    TinyStories corpus
+report/                  Project report and report builder
+Dockerfile               Container setup
+requirements.txt         Pinned Python dependencies
+```
 
-## Project
+📄 **Project report:** [`report/16_Atharv_P16.pdf`](report/16_Atharv_P16.pdf)
+
+## ⚙️ Default sampling
+
+| Temperature | Top-k | Top-p | New characters | Seed |
+|:--:|:--:|:--:|:--:|:--:|
+| 0.7 | 40 | 0.90 | 450 | 42 |
+
+## 👨‍💻 Project
 
 **Atharv Gawali · Roll No. 16 · Problem P16**  
-Generative AI mini-project: LSTM vs Transformer coherence on children's stories.
+Generative AI mini-project exploring story continuity in children's stories.

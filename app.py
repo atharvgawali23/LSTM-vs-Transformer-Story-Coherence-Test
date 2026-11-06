@@ -94,7 +94,7 @@ with gr.Blocks(title="P16 · LSTM vs Transformer Coherence Test (Simple Stories)
                 '<span style="color: #cbd5e1;">|</span> '
                 '<a href="/file=report/p16_codebase.zip" download style="color: #2563eb; font-weight: 500; text-decoration: none;">📦 Codebase (.zip)</a> '
                 '<span style="color: #cbd5e1;">|</span> '
-                '<a href="https://github.com/Atharv-gawali" target="_blank" style="color: #2563eb; font-weight: 500; text-decoration: none;">🐙 GitHub Profile</a>'
+                '<a href="https://github.com/atharvgawali23" target="_blank" style="color: #2563eb; font-weight: 500; text-decoration: none;">🐙 GitHub Profile</a>'
                 '</div>')
     with gr.Tab("Compare Stories"):
         with gr.Row():
