@@ -12,6 +12,32 @@ A small Gradio app that compares story continuations from a character-level LSTM
 
 Both generators use the same prompt and sampling controls (temperature, top-k, top-p, output length, and seed). The app displays their continuations, metrics, and a coherence-by-distance plot.
 
+## Application flow
+
+```mermaid
+flowchart LR
+    U[User prompt and sampling settings] --> A[Gradio app]
+    A --> L[Character LSTM]
+    A --> G[distilGPT-2]
+    L --> SL[LSTM continuation]
+    G --> SG[Transformer continuation]
+    SL --> E[Evaluation]
+    SG --> E
+    E --> NSP[BERT next-sentence coherence]
+    E --> P[Character perplexity]
+    E --> M[Copied 8-gram scan]
+    E --> T[Generation latency]
+    NSP --> R[Comparison table and coherence plot]
+    P --> R
+    M --> R
+    T --> R
+    SL --> W[Higher-scoring continuation]
+    SG --> W
+    W --> V[Text-to-speech audio]
+    R --> O[Results shown in Gradio]
+    V --> O
+```
+
 ## Repository contents
 
 ```text
